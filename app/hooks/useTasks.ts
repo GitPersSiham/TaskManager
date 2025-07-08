@@ -11,3 +11,18 @@ export function useTasks() {
     },
   });
 }
+
+export function useTask(id: string) {
+  return useQuery({
+    queryKey: ['task', id],
+    queryFn: async () => {
+      const res = await fetch(`/api/tasks/${id}`);
+      const data = await res.json();
+      console.log('API response:', data);
+      if (!res.ok) throw new Error('Erreur lors du chargement de la tâche');
+      return data.data;
+  
+    },
+    enabled: !!id,
+  });
+}

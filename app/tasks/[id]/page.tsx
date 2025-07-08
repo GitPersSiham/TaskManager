@@ -5,20 +5,25 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { useUpdateTask } from '@/app/hooks/useUpdateTask';
-import { useTasks } from '@/app/hooks/useTasks';
+import { useTask } from '@/app/hooks/useTasks';
 import { useRef, useState } from 'react';
+import { Textarea } from '@/components/ui/textarea';
 
 export default function EditTaskPage() {
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
-  // Récupérer toutes les tâches
-  const { data: tasks, isLoading, isError } = useTasks();
-  // État local pour le titre de la tâche
+
+  const { data: task, isLoading, isError } = useTask(id);
+ 
   const [title, setTitle] = useState('');
-  // Hook pour la mise à jour de la tâche
+  const [description, setDescription] = useState('');
+  const [dueDate, setDueDate] = useState('');
+  const [priority, setPriority] = useState('medium');
+  const [status, setStatus] = useState('à faire');
+
   const { mutate, isPending } = useUpdateTask();
   const hasInitialized = useRef(false);
-  // Si les données sont en chargement, afficher un message
+  
   if (isLoading) {
     return (
       <motion.div
@@ -45,28 +50,36 @@ export default function EditTaskPage() {
     );
   }
 
-  // Récupérer la tâche spécifique en fonction de l'ID
-  const task = tasks?.find((t: { _id: string; }) => t._id === id);
-
-  // Si la tâche n'est pas trouvée, on peut rediriger ou afficher un message
+ 
   if (!task) {
     return <p>Tâche non trouvée</p>;
   }
 
-  // Initialiser le titre dans l'état local si la tâche est trouvée
-if (task && !hasInitialized.current) {
-      setTitle(task.title);
-      hasInitialized.current = true;
-    }
-  // Fonction de mise à jour de la tâche
+
+  if (task && !hasInitialized.current) {
+    setTitle(task.title);
+    setDescription(task.description || '');
+    setDueDate(task.dueDate ? task.dueDate.slice(0, 10) : '');
+    setPriority(task.priority || 'medium');
+    setStatus(task.status || 'à faire');
+    hasInitialized.current = true;
+  }
+
   const handleUpdate = () => {
     if (!title.trim()) return;
-
     mutate(
-      { id, title, completed: task.completed },
+      {
+        id,
+        title,
+        description,
+        dueDate,
+        priority,
+        status,
+        completed: task.completed,
+      },
       {
         onSuccess: () => {
-           router.push('/');  // Redirige après la mise à jour
+          router.push('/');
         },
       }
     );
@@ -74,22 +87,60 @@ if (task && !hasInitialized.current) {
 
   return (
     <motion.div
-      className="max-w-md mx-auto mt-10 space-y-4"
+      className="max-w-md mx-auto mt-10"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
     >
-      <h1 className="text-xl font-bold">Modifier la tâche</h1>
-
-      <Input
-        value={title}  // Lien avec l'état local `title`
-        onChange={(e) => setTitle(e.target.value)}  // Met à jour l'état `title`
-        placeholder="Titre de la tâche"
-      />
-
-      <Button onClick={handleUpdate} disabled={isPending}>
-        {isPending ? 'Enregistrement...' : 'Mettre à jour'}
-      </Button>
+      <div className="bg-white shadow-xl rounded-xl p-6 space-y-5 border">
+        <h1 className="text-2xl font-bold text-center mb-2">Modifier la tâche</h1>
+        <div className="space-y-4">
+          <Input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Titre de la tâche"
+          />
+          <Textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Description (facultatif)"
+          />
+          <Input
+            type="date"
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+          />
+          <div className="flex gap-2">
+            <label className="flex-1">
+              Priorité :
+              <select
+                value={priority}
+                onChange={(e) => setPriority(e.target.value)}
+                className="w-full mt-1 border rounded px-2 py-1"
+              >
+                <option value="low">Faible</option>
+                <option value="medium">Moyenne</option>
+                <option value="high">Élevée</option>
+              </select>
+            </label>
+            <label className="flex-1">
+              Statut :
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="w-full mt-1 border rounded px-2 py-1"
+              >
+                <option value="à faire">À faire</option>
+                <option value="en cours">En cours</option>
+                <option value="terminée">Terminée</option>
+              </select>
+            </label>
+          </div>
+        </div>
+        <Button onClick={handleUpdate} disabled={isPending} className="w-full mt-4">
+          {isPending ? 'Enregistrement...' : 'Mettre à jour'}
+        </Button>
+      </div>
     </motion.div>
   );
 }
