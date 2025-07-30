@@ -19,7 +19,7 @@ export default function Home() {
   const handleAddTask = async () => {
     if (!title.trim()) return;  // Ne rien faire si le champ est vide
 
-    mutate({title,
+    mutate({id: '', title,
       description,
       dueDate,
       priority,

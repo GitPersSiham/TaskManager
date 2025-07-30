@@ -1,13 +1,7 @@
+import { Task } from '@/lib/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-export type Task = {
-  title: string;
-  description: string;
-  dueDate: string;
-  priority: string;
-  status: string;
-  completed: boolean;
-};
+
 
 export function useAddTask() {
   const queryClient = useQueryClient();

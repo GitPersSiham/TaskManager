@@ -11,7 +11,7 @@ import { useUpdateTask } from '@/app/hooks/useUpdateTask';
 
 
 type Task = {
-  _id: string;
+  id: string;
   title: string;
   description: string;
   dueDate: string;
@@ -28,7 +28,7 @@ const TaskList = () => {
  
   const toggleComplete = (task: Task) => {
     updateTask({
-      id: task._id,
+      id: task.id,
       title: task.title,
       description: task.description,
       dueDate: task.dueDate,
@@ -47,7 +47,7 @@ const TaskList = () => {
         if (task.completed) borderColor = 'border-green-400';
         else if (task.status === 'en cours') borderColor = 'border-blue-400';
         return (
-          <Card key={task._id} className={`bg-white shadow-xl border-l-8 ${borderColor} p-0 transition-transform hover:scale-[1.02]`}>
+          <Card key={task.id} className={`bg-white shadow-xl border-l-8 ${borderColor} p-0 transition-transform hover:scale-[1.02]`}>
             <CardContent className="flex flex-col gap-4 py-6 px-6">
               <div className="flex items-center justify-between mb-2">
                 <span
@@ -73,17 +73,17 @@ const TaskList = () => {
               </div>
               <div className="flex flex-wrap gap-3 justify-center mt-6">
                 <Button asChild size="sm" className="rounded-full px-5 py-2 font-semibold transition-colors hover:bg-blue-600 hover:text-white">
-                  <Link href={`/tasks/${task._id}`}>Modifier</Link>
+                  <Link href={`/tasks/${task.id}`}>Modifier</Link>
                 </Button>
-                <AlertDialog open={open && selectedTaskId === task._id} onOpenChange={setOpen}>
+                <AlertDialog open={open && selectedTaskId === task.id} onOpenChange={setOpen}>
                   <AlertDialogTrigger asChild>
                     <Button size="sm" variant="destructive" className="rounded-full px-5 py-2 font-semibold transition-colors hover:bg-red-600 hover:text-white"
                       onClick={() => {
-                        setSelectedTaskId(task._id);
+                        setSelectedTaskId(task.id);
                         setOpen(true);
                       }}
                     >
-                      {isPending && selectedTaskId === task._id ? 'Suppression...' : 'Supprimer'}
+                      {isPending && selectedTaskId === task.id ? 'Suppression...' : 'Supprimer'}
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
@@ -100,7 +100,7 @@ const TaskList = () => {
                         deleteTask(selectedTaskId);
                         setOpen(false);
                       }}
-                      disabled={isPending && selectedTaskId === task._id}>
+                      disabled={isPending && selectedTaskId === task.id}>
                         Confirmer
                       </AlertDialogAction>
                     </AlertDialogFooter>
